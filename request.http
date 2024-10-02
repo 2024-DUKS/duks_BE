@@ -1,0 +1,30 @@
+### 로그인 요청
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "studentId": 20221234,
+  "password": "pw11223344"
+}
+
+### 회원가입 실패 (비밀번호 규칙 미준수)
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "이순신",
+  "studentId": "20221235",
+  "password": "1234567",
+  "nickname": "순신이",
+  "department": "경영학과",
+  "phone": "010-9876-5432"
+}
+
+### 로그인 실패 (잘못된 비밀번호)
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "studentId": 20221234,
+  "password": "wrongpassword"
+}
