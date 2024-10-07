@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes'); // 댓글 라우터 추가
 const mysql = require('mysql2/promise');
@@ -46,11 +47,11 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes); // 댓글 라우터 경로 추가
+app.use('/api/users', userRoutes);
 
 // 서버 실행 및 DB 초기화
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
-  await initializeDatabase(); // DB 초기화 함수 실행
 });
