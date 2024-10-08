@@ -1,4 +1,3 @@
-// models/userModel.js
 const pool = require('../config/db');
 
 const createUser = async (userData) => {
@@ -14,7 +13,15 @@ const findUserByStudentId = async (studentId) => {
   return rows[0];
 };
 
+// ID로 유저 조회
+const findUserById = async (id) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  const [rows] = await pool.execute(query, [id]);
+  return rows[0];
+};
+
 module.exports = {
   createUser,
   findUserByStudentId,
+  findUserById,
 };
