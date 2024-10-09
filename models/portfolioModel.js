@@ -28,9 +28,41 @@ const deleteSkill = async (userId, id) => {
   return result;
 };
 
+// Charactor 추가
+const addCharactor = async (userId, charactor) => {
+  const query = `INSERT INTO charactors (userId, charactor) VALUES (?, ?)`;
+  const [result] = await pool.execute(query, [userId, charactor]);
+  return result;
+};
+
+// Charactor 조회
+const getCharactor = async (userId) => {
+  const query = `SELECT * FROM charactors WHERE userId = ?`;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows[0];
+};
+
+// Charactor 수정
+const updateCharactor = async (userId, charactor) => {
+  const query = `UPDATE charactors SET charactor = ? WHERE userId = ?`;
+  const [result] = await pool.execute(query, [charactor, userId]);
+  return result;
+};
+
+// Charactor 삭제
+const deleteCharactor = async (userId) => {
+  const query = `DELETE FROM charactors WHERE userId = ?`;
+  const [result] = await pool.execute(query, [userId]);
+  return result;
+};
+
 module.exports = {
   addSkill,
   getSkills,
   getSkillById,
   deleteSkill,
+  addCharactor,
+  getCharactor,
+  updateCharactor,
+  deleteCharactor,
 };
