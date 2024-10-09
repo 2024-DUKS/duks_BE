@@ -56,6 +56,34 @@ const deleteCharactor = async (userId) => {
   return result;
 };
 
+// folioImg 추가
+const addFolioImg = async (userId, imagePath) => {
+    const query = `INSERT INTO folioImgs (userId, imagePath) VALUES (?, ?)`;
+    const [result] = await pool.execute(query, [userId, imagePath]);
+    return result;
+  };
+  
+  // folioImg 조회
+  const getFolioImg = async (userId) => {
+    const query = `SELECT * FROM folioImgs WHERE userId = ?`;
+    const [rows] = await pool.execute(query, [userId]);
+    return rows[0];  // 하나의 이미지 반환
+  };
+  
+  // folioImg 수정
+  const updateFolioImg = async (userId, imagePath) => {
+    const query = `UPDATE folioImgs SET imagePath = ? WHERE userId = ?`;
+    const [result] = await pool.execute(query, [imagePath, userId]);
+    return result;
+  };
+  
+  // folioImg 삭제
+  const deleteFolioImg = async (userId) => {
+    const query = `DELETE FROM folioImgs WHERE userId = ?`;
+    const [result] = await pool.execute(query, [userId]);
+    return result;
+  };
+
 module.exports = {
   addSkill,
   getSkills,
@@ -65,4 +93,8 @@ module.exports = {
   getCharactor,
   updateCharactor,
   deleteCharactor,
+  addFolioImg,
+  getFolioImg,
+  updateFolioImg,
+  deleteFolioImg,
 };

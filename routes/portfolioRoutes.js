@@ -7,10 +7,26 @@ const {
   createCharactor,
   getUserCharactor,
   editCharactor,
-  removeCharactor
+  removeCharactor,
+  uploadFolioImg,
+  getUserFolioImg,
+  editFolioImg,
+  removeFolioImg
 } = require('../controllers/portfolioController');
 const authenticateToken = require('../middlewares/authMiddleware');
+const multer = require('multer');
 
+// Multer 설정: 이미지를 서버에 저장할 경로 설정
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+      cb(null, Date.now() + '-' + file.originalname);
+    }
+  });
+const upload = multer({ storage });
+  
 const router = express.Router();
 
 // 스킬 추가 (경로를 /skills로 명확히 설정)
@@ -36,5 +52,11 @@ router.put('/charactor', authenticateToken, editCharactor);
 
 // Charactor 삭제 (경로를 /charactor로 명확히 설정)
 router.delete('/charactor', authenticateToken, removeCharactor);
+
+// folioImg 관련 경로
+router.post('/folioImg', authenticateToken, upload.single('image'), uploadFolioImg);  // 이미지 업로드
+router.get('/folioImg', authenticateToken, getUserFolioImg);  // 이미지 조회
+router.put('/folioImg', authenticateToken, upload.single('image'), editFolioImg);  // 이미지 수정
+router.delete('/folioImg', authenticateToken, removeFolioImg);  // 이미지 삭제
 
 module.exports = router;

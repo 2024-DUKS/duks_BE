@@ -5,11 +5,25 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes'); // 댓글 라우터 추가
 const mysql = require('mysql2/promise');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const multer = require('multer'); // Multer for file uploads
+const path = require('path');
 
 // 환경변수 파일 로드
 dotenv.config();
 
 const app = express();
+
+// Multer 설정: 이미지 저장 경로 및 파일명 설정
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // 이미지가 저장될 폴더
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // 파일명 설정 (현재 시간 + 원래 파일명)
+  }
+});
+
+const upload = multer({ storage });
 
 // MySQL 연결 설정
 const dbConfig = {
@@ -35,13 +49,45 @@ async function initializeDatabase() {
       phone VARCHAR(20)
     );
   `);
+  // portfolios 테이블이 없으면 생성
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS portfolios (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      userId INT NOT NULL,
+      skill VARCHAR(100) NOT NULL,
+      level ENUM('상', '중', '하') NOT NULL,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
 
-  console.log('users table created or already exists.');
+  // charactors 테이블이 없으면 생성
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS charactors (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      userId INT NOT NULL,
+      charactor TEXT NOT NULL,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  // folioImgs 테이블이 없으면 생성
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS folioImgs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      userId INT NOT NULL,
+      imagePath VARCHAR(255) NOT NULL,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
+  console.log('Database tables created or already exist.');
   connection.end(); // 연결 종료
 }
 
 // JSON 바디 파싱
 app.use(express.json());
+
+// 정적 파일 경로 설정 (이미지 파일을 전송하기 위해)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 라우트 설정
 app.use('/api/auth', authRoutes);
@@ -53,5 +99,6 @@ app.use('/api/portfolios', portfolioRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`); // DB 초기화 함수 실행
+  console.log(`Server running on port ${PORT}`);
+  await initializeDatabase(); // DB 초기화 함수 실행
 });

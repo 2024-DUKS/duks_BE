@@ -46,7 +46,15 @@ async function initializeDatabase() {
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS folioImgs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        imagePath VARCHAR(255) NOT NULL,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+    
     console.log('Database tables initialized.');
   } catch (error) {
     console.error('Error initializing database tables:', error);
