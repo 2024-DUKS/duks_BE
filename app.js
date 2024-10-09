@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors'); // CORS 모듈 추가
 const authRoutes = require('./routes/authRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes'); // 댓글 라우터 추가
@@ -12,6 +13,12 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
+
+// CORS 설정 추가 (React 앱의 주소로부터 오는 요청을 허용)
+app.use(cors({
+    origin: 'http://localhost:3000', // React 앱이 돌아가는 주소
+    credentials: true // 쿠키나 인증 정보 전송을 허용
+}));
 
 // Multer 설정: 이미지 저장 경로 및 파일명 설정
 const storage = multer.diskStorage({
