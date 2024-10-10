@@ -2,12 +2,12 @@
 const pool = require('../config/db');
 
 const createPost = async (postData) => {
-  const { title, content, price, category, type, imageUrl, userId } = postData;
+  const { title, content, price, category, imageUrl, userId, type } = postData;
   const query = `
-    INSERT INTO posts (title, content, price, category, type, image_url, user_id)
+    INSERT INTO posts (title, content, price, category, image_url, user_id, type)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
-  const [result] = await pool.execute(query, [title, content, price, category, type, imageUrl, userId]);
+  const [result] = await pool.execute(query, [title, content, price, category, imageUrl, userId, type]);
   return result;
 };
 
