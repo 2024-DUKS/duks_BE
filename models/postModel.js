@@ -24,6 +24,22 @@ const getLatestPosts = async () => {
   return rows;
 };
 
+// 해드립니다 또는 해주세요 게시글을 최신순으로 가져오기
+const getPostsByType = async (category, type) => {
+  const query = `
+    SELECT posts.id, posts.title, posts.price, posts.created_at, posts.image_url, 
+           users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.category = ? AND posts.type = ?
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [category, type]);
+  return rows;
+};
+
 // 게시글 타입별 최신 2개 불러오기
 const getLatestPostsByType = async (type) => {
     const query = `
@@ -95,23 +111,26 @@ const getPostById = async (postId) => {
     return rows[0];
   };
 
-// 게시글 수정
+// 게시글 수정 함수
 const updatePost = async (postId, userId, updatedData) => {
-  const { title, content, price, category } = updatedData;
+  const { title, content, price, category, imageUrl, type } = updatedData;
   const query = `
     UPDATE posts
-    SET title = ?, content = ?, price = ?, category = ?
+    SET title = ?, content = ?, price = ?, category = ?, image_url = IFNULL(?, image_url), type = ?
     WHERE id = ? AND user_id = ?
   `;
-  const [result] = await pool.execute(query, [title, content, price, category, postId, userId]);
-  return result.affectedRows > 0; // 수정된 행이 있는지 확인
+  const [result] = await pool.execute(query, [title, content, price, category, imageUrl, type, postId, userId]);
+  return result.affectedRows > 0;  // 수정된 행이 있는지 확인
 };
 
-// 게시글 삭제
+// 게시글 삭제 함수
 const deletePost = async (postId, userId) => {
-  const query = `DELETE FROM posts WHERE id = ? AND user_id = ?`;
+  const query = `
+    DELETE FROM posts
+    WHERE id = ? AND user_id = ?
+  `;
   const [result] = await pool.execute(query, [postId, userId]);
-  return result.affectedRows > 0; // 삭제된 행이 있는지 확인
+  return result.affectedRows > 0;
 };
   
   // 댓글을 가져오기
@@ -157,4 +176,5 @@ module.exports = {
   updatePost,
   getTopLikedPostsByCategory,
   getLatestPostsByCategory,
+  getPostsByType,
 };

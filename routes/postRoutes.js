@@ -33,7 +33,7 @@ router.get('/category/:category', getPostsByCategory);
 // 게시글 작성 라우터: JWT 인증 미들웨어가 Multer보다 먼저 실행되도록 설정
 router.post('/create', authenticateToken, upload.array('images', 5), createNewPost);
 
-// 게시글 상세 보기
+// 게시글 상세보기
 router.get('/:postId', getPostDetails);
 
 // 게시글 공감 (JWT 인증 필요)
@@ -42,8 +42,8 @@ router.post('/:postId/like', authenticateToken, likePost);
 // 공감 취소
 router.delete('/:postId/unlike', authenticateToken, unlikePost);
 
-// 게시글 수정 (JWT 인증 필요)
-router.put('/:postId', authenticateToken, updateUserPost);
+// 게시글 수정
+router.put('/:postId', authenticateToken, upload.array('images', 5), updateUserPost);
 
 // 게시글 삭제
 router.delete('/:postId', authenticateToken, deleteUserPost);
