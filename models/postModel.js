@@ -183,6 +183,23 @@ const deletePost = async (postId, userId) => {
     
   };
 
+  // 카테고리별로 제목 또는 내용에서 검색어가 포함된 게시글 검색
+const searchPostsByCategory = async (category, keyword) => {
+  const query = `
+    SELECT posts.id, posts.title, posts.content, posts.price, posts.image_url,
+            posts.created_at, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.category = ? AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`; // 검색어 앞뒤에 %를 추가하여 LIKE 쿼리에 맞춤
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
 module.exports = {
   createPost,
   getLatestPosts,
@@ -198,4 +215,5 @@ module.exports = {
   getLatestPostsByCategory,
   getPostsByType,
   searchPosts,
+  searchPostsByCategory,
 };

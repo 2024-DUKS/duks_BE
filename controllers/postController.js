@@ -1,7 +1,7 @@
 // controllers/postController.js
 const { createPost, getLatestPostsByType, //getPostsByCategory, 
   getPostById, getCommentsByPostId, addLike, deletePost, removeLike, updatePost,
-  getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts} = require('../models/postModel');
+  getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, searchPostsByCategory} = require('../models/postModel');
 
 
   const createNewPost = async (req, res) => {
@@ -204,7 +204,25 @@ const searchForPosts = async (req, res) => {
     res.status(500).json({ message: '검색 중 오류가 발생했습니다.' });
   }
 };
-  
+
+const searchCategoryPosts = async (req, res) => {
+  const { category } = req.params; // URL에서 카테고리 추출
+  const { keyword } = req.query; // 쿼리 파라미터에서 검색어 추출
+
+  if (!keyword) {
+    return res.status(400).json({ message: '검색어를 입력해주세요.' });
+  }
+
+  try {
+    // 카테고리 내에서 검색어가 포함된 게시글 검색
+    const posts = await searchPostsByCategory(category, keyword);
+
+    res.status(200).json(posts); // 검색 결과를 클라이언트로 반환
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '검색 중 오류가 발생했습니다.' });
+  }
+};
   
 
 module.exports = {
@@ -218,4 +236,5 @@ module.exports = {
   deleteUserPost,
   updateUserPost,
   searchForPosts,
+  searchCategoryPosts,
 };
