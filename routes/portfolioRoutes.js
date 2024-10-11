@@ -15,18 +15,19 @@ const {
 } = require('../controllers/portfolioController');
 const authenticateToken = require('../middlewares/authMiddleware');
 const multer = require('multer');
+const path = require('path');
 
 // Multer 설정: 이미지를 서버에 저장할 경로 설정
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'uploads/');
+      cb(null, path.join(__dirname, '../uploads/'));  // 명확한 경로 설정
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname);
+      cb(null, Date.now() + '-' + file.originalname);  // 파일 이름 중복 방지
     }
-  });
+});
 const upload = multer({ storage });
-  
+
 const router = express.Router();
 
 // 스킬 추가 (경로를 /skills로 명확히 설정)
