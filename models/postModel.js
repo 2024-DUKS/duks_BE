@@ -70,7 +70,7 @@ const getPostsByCategory = async (category) => {
 // 공감수 기준 인기 게시글 3개 가져오기 (특정 카테고리에서)
 const getTopLikedPostsByCategory = async (category) => {
   const query = `
-    SELECT posts.id, posts.title, COUNT(likes.id) AS likeCount
+    SELECT posts.*, COUNT(likes.id) AS likeCount
     FROM posts
     LEFT JOIN likes ON posts.id = likes.post_id
     WHERE posts.category = ?
@@ -163,6 +163,26 @@ const deletePost = async (postId, userId) => {
     return result.affectedRows > 0;
   };
 
+  // 제목이나 내용에서 검색어가 포함된 게시글 검색
+  const searchPosts = async (keyword) => {
+    console.log("모델 들어옴");
+    const query = `
+      SELECT posts.id, posts.title, posts.content, posts.price, posts.image_url,
+            posts.created_at, users.nickname, COUNT(likes.id) AS likeCount
+      FROM posts
+      JOIN users ON posts.user_id = users.id
+      LEFT JOIN likes ON posts.id = likes.post_id
+      WHERE posts.title LIKE ? OR posts.content LIKE ?
+      GROUP BY posts.id
+      ORDER BY posts.created_at DESC
+    `;
+    const likeKeyword = `%${keyword}%`;  // SQL에서 LIKE 검색을 위해 앞뒤에 % 추가
+    const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+    return rows;
+
+    
+  };
+
 module.exports = {
   createPost,
   getLatestPosts,
@@ -177,4 +197,5 @@ module.exports = {
   getTopLikedPostsByCategory,
   getLatestPostsByCategory,
   getPostsByType,
+  searchPosts,
 };

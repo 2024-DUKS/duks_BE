@@ -1,7 +1,7 @@
 // routes/postRoutes.js
 const express = require('express');
 const { createNewPost, getMainPagePosts, getCategoryPosts, getPostDetails, 
-    likePost, deleteUserPost, unlikePost, updateUserPost, getPostsByCategory } = require('../controllers/postController');
+    likePost, deleteUserPost, unlikePost, updateUserPost, getPostsByCategory, searchForPosts } = require('../controllers/postController');
 const authenticateToken = require('../middlewares/authMiddleware'); // JWT 미들웨어 추가
 const multer = require('multer');
 
@@ -32,6 +32,9 @@ router.get('/category/:category', getPostsByCategory);
 
 // 게시글 작성 라우터: JWT 인증 미들웨어가 Multer보다 먼저 실행되도록 설정
 router.post('/create', authenticateToken, upload.array('images', 5), createNewPost);
+
+// 게시글 검색 라우트
+router.get('/search', searchForPosts);  // 검색 API 등록
 
 // 게시글 상세보기
 router.get('/:postId', getPostDetails);
