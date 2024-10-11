@@ -1,5 +1,5 @@
 // controllers/commentController.js
-const { createComment, deleteComment, updateComment } = require('../models/commentModel');
+const { createComment, deleteComment, updateComment, getCommentsByPostId } = require('../models/commentModel');
 
 const createNewComment = async (req, res) => {
   const { content, postId } = req.body;
@@ -54,8 +54,22 @@ const deleteUserComment = async (req, res) => {
   }
 };
 
+// 특정 게시글에 달린 댓글 목록만 반환
+const getCommentsForPost = async (req, res) => {
+  const { postId } = req.params;
+
+  try {
+    const comments = await getCommentsByPostId(postId);
+    res.status(200).json(comments);  // 댓글 목록만 반환
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '댓글을 불러오는 중 오류가 발생했습니다.' });
+  }
+};
+
 module.exports = {
   createNewComment,
   deleteUserComment,
   updateUserComment,
+  getCommentsForPost,
 };

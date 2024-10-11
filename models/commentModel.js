@@ -29,8 +29,22 @@ const deleteComment = async (commentId, userId) => {
   return result.affectedRows > 0;
 };
 
+// 게시글 ID로 해당 게시글의 댓글들을 가져오기 (닉네임, 학과, 작성 시간 포함)
+const getCommentsByPostId = async (postId) => {
+  const query = `
+    SELECT comments.id, comments.content, comments.created_at, users.nickname, users.department
+    FROM comments
+    JOIN users ON comments.user_id = users.id
+    WHERE comments.post_id = ?
+    ORDER BY comments.created_at ASC
+  `;
+  const [rows] = await pool.execute(query, [postId]);
+  return rows;
+};
+
 module.exports = {
   createComment,
   deleteComment,
   updateComment,
+  getCommentsByPostId,
 };

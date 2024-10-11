@@ -1,6 +1,6 @@
 // routes/commentRoutes.js
 const express = require('express');
-const { createNewComment, deleteUserComment, updateUserComment } = require('../controllers/commentController');
+const { createNewComment, deleteUserComment, updateUserComment, getCommentsForPost } = require('../controllers/commentController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -13,5 +13,8 @@ router.put('/:commentId', authenticateToken, updateUserComment);
 
 // 댓글 삭제
 router.delete('/:commentId', authenticateToken, deleteUserComment);
+
+// 특정 게시글의 댓글만 가져오기
+router.get('/post/:postId/comments', getCommentsForPost);
 
 module.exports = router;
