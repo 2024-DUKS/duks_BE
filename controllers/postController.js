@@ -1,7 +1,8 @@
 // controllers/postController.js
 const { createPost, getLatestPostsByType, //getPostsByCategory, 
   getPostById, getCommentsByPostId, addLike, deletePost, removeLike, updatePost,
-  getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, searchPostsByCategory} = require('../models/postModel');
+  getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, 
+  searchPostsByCategory, hasUserLikedPost} = require('../models/postModel');
 
 
   const createNewPost = async (req, res) => {
@@ -88,6 +89,7 @@ const getPostsByCategory = async (req, res) => {
 
 const getPostDetails = async (req, res) => {
   const { postId } = req.params;
+  const userId = req.user ? req.user.id : null;  // 로그인한 유저 정보가 있을 경우
 
   try {
       const post = await getPostById(postId);
@@ -101,10 +103,14 @@ const getPostDetails = async (req, res) => {
 
       const comments = await getCommentsByPostId(postId);
 
+      // 3. 사용자가 이미 공감했는지 확인
+      const isLiked = userId ? await hasUserLikedPost(postId, userId) : false;
+
       res.status(200).json({
           ...post,
           imageUrls,  // 이미지 배열 추가
-          comments
+          comments,
+          isLiked
       });
   } catch (error) {
       console.error(error);

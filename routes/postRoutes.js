@@ -41,7 +41,7 @@ router.get('/search', searchForPosts);  // 검색 API 등록
 router.get('/category/:category/search', searchCategoryPosts);
 
 // 게시글 상세보기
-router.get('/:postId', getPostDetails);
+router.get('/:postId', authenticateToken, getPostDetails);
 
 // 게시글 공감 (JWT 인증 필요)
 router.post('/:postId/like', authenticateToken, likePost);

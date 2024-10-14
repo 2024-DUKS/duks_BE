@@ -163,6 +163,15 @@ const deletePost = async (postId, userId) => {
     return result.affectedRows > 0;
   };
 
+  // 사용자가 게시글에 공감을 했는지 확인
+const hasUserLikedPost = async (postId, userId) => {
+  const query = `
+    SELECT * FROM likes WHERE post_id = ? AND user_id = ?
+  `;
+  const [rows] = await pool.execute(query, [postId, userId]);
+  return rows.length > 0; // 해당 게시글에 공감한 적이 있는지 확인
+};
+
   // 제목이나 내용에서 검색어가 포함된 게시글 검색
   const searchPosts = async (keyword) => {
     console.log("모델 들어옴");
@@ -216,4 +225,5 @@ module.exports = {
   getPostsByType,
   searchPosts,
   searchPostsByCategory,
+  hasUserLikedPost,
 };
