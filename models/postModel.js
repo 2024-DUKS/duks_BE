@@ -209,6 +209,75 @@ const searchPostsByCategory = async (category, keyword) => {
   return rows;
 };
 
+// "해드립니다"로 검색
+const searchOfferPosts = async (keyword) => {
+  const query = `
+    SELECT posts.*, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해드립니다'
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해주세요"로 검색
+const searchRequestPosts = async (keyword) => {
+  const query = `
+    SELECT posts.*, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해주세요'
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해드립니다" 게시글을 카테고리와 함께 검색 (공감수 포함)
+const searchOfferPostsByCategory = async (keyword, category) => {
+  const query = `
+    SELECT posts.*, users.nickname, users.department, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해드립니다' AND posts.category = ? 
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해주세요" 게시글을 카테고리와 함께 검색 (공감수 포함)
+const searchRequestPostsByCategory = async (keyword, category) => {
+  const query = `
+    SELECT posts.*, users.nickname, users.department, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해주세요' AND posts.category = ? 
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
+
 module.exports = {
   createPost,
   getLatestPosts,
@@ -226,4 +295,8 @@ module.exports = {
   searchPosts,
   searchPostsByCategory,
   hasUserLikedPost,
+  searchOfferPosts,
+  searchRequestPosts,
+  searchOfferPostsByCategory,
+  searchRequestPostsByCategory,
 };

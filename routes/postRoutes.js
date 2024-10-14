@@ -2,7 +2,9 @@
 const express = require('express');
 const { createNewPost, getMainPagePosts, getCategoryPosts, getPostDetails, 
     likePost, deleteUserPost, unlikePost, updateUserPost, getPostsByCategory, 
-    searchForPosts, searchCategoryPosts } = require('../controllers/postController');
+    searchForPosts, searchCategoryPosts, searchOfferPostsController,
+    searchRequestPostsController, searchOfferPostsByCategoryController,
+    searchRequestPostsByCategoryController, } = require('../controllers/postController');
 const authenticateToken = require('../middlewares/authMiddleware'); // JWT 미들웨어 추가
 const multer = require('multer');
 
@@ -37,8 +39,21 @@ router.post('/create', authenticateToken, upload.array('images', 5), createNewPo
 // 게시글 검색 라우트
 router.get('/search', searchForPosts);  // 검색 API 등록
 
+// "해드립니다" 게시글 통합검색
+router.get('/search/offer', searchOfferPostsController);
+
+// "해주세요" 게시글 통합검색
+router.get('/search/request', searchRequestPostsController);
+
 // 카테고리별 게시글 검색
 router.get('/category/:category/search', searchCategoryPosts);
+
+// "해드립니다" 카테고리별 검색 (공감수 포함)
+router.get('/search/category/:category/offer', searchOfferPostsByCategoryController);
+
+// "해주세요" 카테고리별 검색 (공감수 포함)
+router.get('/search/category/:category/request', searchRequestPostsByCategoryController);
+
 
 // 게시글 상세보기
 router.get('/:postId', authenticateToken, getPostDetails);

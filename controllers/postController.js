@@ -2,7 +2,8 @@
 const { createPost, getLatestPostsByType, //getPostsByCategory, 
   getPostById, getCommentsByPostId, addLike, deletePost, removeLike, updatePost,
   getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, 
-  searchPostsByCategory, hasUserLikedPost} = require('../models/postModel');
+  searchPostsByCategory, hasUserLikedPost, searchOfferPosts, searchRequestPosts,
+  searchOfferPostsByCategory, searchRequestPostsByCategory,} = require('../models/postModel');
 
 
   const createNewPost = async (req, res) => {
@@ -211,6 +212,40 @@ const searchForPosts = async (req, res) => {
   }
 };
 
+// "해드립니다" 게시글 검색
+const searchOfferPostsController = async (req, res) => {
+  const { keyword } = req.query;
+
+  if (!keyword) {
+    return res.status(400).json({ message: '검색어를 입력해주세요.' });
+  }
+
+  try {
+    const posts = await searchOfferPosts(keyword);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '게시글 검색 중 오류가 발생했습니다.' });
+  }
+};
+
+// "해주세요" 게시글 검색
+const searchRequestPostsController = async (req, res) => {
+  const { keyword } = req.query;
+
+  if (!keyword) {
+    return res.status(400).json({ message: '검색어를 입력해주세요.' });
+  }
+
+  try {
+    const posts = await searchRequestPosts(keyword);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '게시글 검색 중 오류가 발생했습니다.' });
+  }
+};
+
 const searchCategoryPosts = async (req, res) => {
   const { category } = req.params; // URL에서 카테고리 추출
   const { keyword } = req.query; // 쿼리 파라미터에서 검색어 추출
@@ -229,6 +264,42 @@ const searchCategoryPosts = async (req, res) => {
     res.status(500).json({ message: '검색 중 오류가 발생했습니다.' });
   }
 };
+
+// "해드립니다" 게시글을 카테고리별로 검색 (공감수 포함)
+const searchOfferPostsByCategoryController = async (req, res) => {
+  const { category } = req.params;  // URL 경로 파라미터로 카테고리 받기
+  const { keyword } = req.query;    // 쿼리 파라미터로 검색어 받기
+
+  if (!keyword) {
+    return res.status(400).json({ message: '검색어를 입력해주세요.' });
+  }
+
+  try {
+    const posts = await searchOfferPostsByCategory(keyword, category);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '게시글 검색 중 오류가 발생했습니다.' });
+  }
+};
+
+// "해주세요" 게시글을 카테고리별로 검색 (공감수 포함)
+const searchRequestPostsByCategoryController = async (req, res) => {
+  const { category } = req.params;  // URL 경로 파라미터로 카테고리 받기
+  const { keyword } = req.query;    // 쿼리 파라미터로 검색어 받기
+
+  if (!keyword) {
+    return res.status(400).json({ message: '검색어를 입력해주세요.' });
+  }
+
+  try {
+    const posts = await searchRequestPostsByCategory(keyword, category);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '게시글 검색 중 오류가 발생했습니다.' });
+  }
+};
   
 
 module.exports = {
@@ -243,4 +314,8 @@ module.exports = {
   updateUserPost,
   searchForPosts,
   searchCategoryPosts,
+  searchOfferPostsController,
+  searchRequestPostsController,
+  searchOfferPostsByCategoryController,
+  searchRequestPostsByCategoryController,
 };

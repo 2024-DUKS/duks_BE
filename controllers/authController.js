@@ -61,7 +61,9 @@ const login = async (req, res) => {
       expiresIn: '1h', // 토큰 만료시간 1시간
     });
 
-    res.status(200).json({ message: '로그인 성공', token });
+    res.status(200).json({ message: '로그인 성공', 
+      token,
+      userId: user.id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
