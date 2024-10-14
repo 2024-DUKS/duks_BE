@@ -2,12 +2,12 @@
 const pool = require('../config/db');
 
 const createPost = async (postData) => {
-  const { title, content, price, category, type, imageUrl, userId } = postData;
+  const { title, content, price, category, imageUrl, userId, type } = postData;
   const query = `
-    INSERT INTO posts (title, content, price, category, type, image_url, user_id)
+    INSERT INTO posts (title, content, price, category, image_url, user_id, type)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
-  const [result] = await pool.execute(query, [title, content, price, category, type, imageUrl, userId]);
+  const [result] = await pool.execute(query, [title, content, price, category, imageUrl, userId, type]);
   return result;
 };
 
@@ -21,6 +21,22 @@ const getLatestPosts = async () => {
     LIMIT 3
   `;
   const [rows] = await pool.execute(query);
+  return rows;
+};
+
+// 해드립니다 또는 해주세요 게시글을 최신순으로 가져오기
+const getPostsByType = async (category, type) => {
+  const query = `
+    SELECT posts.id, posts.title, posts.price, posts.created_at, posts.image_url, 
+           users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.category = ? AND posts.type = ?
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [category, type]);
   return rows;
 };
 
@@ -54,7 +70,7 @@ const getPostsByCategory = async (category) => {
 // 공감수 기준 인기 게시글 3개 가져오기 (특정 카테고리에서)
 const getTopLikedPostsByCategory = async (category) => {
   const query = `
-    SELECT posts.id, posts.title, COUNT(likes.id) AS likeCount
+    SELECT posts.*, COUNT(likes.id) AS likeCount
     FROM posts
     LEFT JOIN likes ON posts.id = likes.post_id
     WHERE posts.category = ?
@@ -85,33 +101,37 @@ const getLatestPostsByCategory = async (category) => {
 // 게시글 상세 정보를 ID로 가져오기
 const getPostById = async (postId) => {
     const query = `
-      SELECT posts.*, users.nickname, users.department,
+      SELECT posts.*, users.nickname, users.department, folioImgs.imagePath,
              (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS likes
       FROM posts
       JOIN users ON posts.user_id = users.id
+      LEFT JOIN folioImgs ON users.id = folioImgs.userId
       WHERE posts.id = ?
     `;
     const [rows] = await pool.execute(query, [postId]);
     return rows[0];
   };
 
-// 게시글 수정
+// 게시글 수정 함수
 const updatePost = async (postId, userId, updatedData) => {
-  const { title, content, price, category } = updatedData;
+  const { title, content, price, category, imageUrl, type } = updatedData;
   const query = `
     UPDATE posts
-    SET title = ?, content = ?, price = ?, category = ?
+    SET title = ?, content = ?, price = ?, category = ?, image_url = IFNULL(?, image_url), type = ?
     WHERE id = ? AND user_id = ?
   `;
-  const [result] = await pool.execute(query, [title, content, price, category, postId, userId]);
-  return result.affectedRows > 0; // 수정된 행이 있는지 확인
+  const [result] = await pool.execute(query, [title, content, price, category, imageUrl, type, postId, userId]);
+  return result.affectedRows > 0;  // 수정된 행이 있는지 확인
 };
 
-// 게시글 삭제
+// 게시글 삭제 함수
 const deletePost = async (postId, userId) => {
-  const query = `DELETE FROM posts WHERE id = ? AND user_id = ?`;
+  const query = `
+    DELETE FROM posts
+    WHERE id = ? AND user_id = ?
+  `;
   const [result] = await pool.execute(query, [postId, userId]);
-  return result.affectedRows > 0; // 삭제된 행이 있는지 확인
+  return result.affectedRows > 0;
 };
   
   // 댓글을 가져오기
@@ -144,6 +164,121 @@ const deletePost = async (postId, userId) => {
     return result.affectedRows > 0;
   };
 
+  // 사용자가 게시글에 공감을 했는지 확인
+const hasUserLikedPost = async (postId, userId) => {
+  const query = `
+    SELECT * FROM likes WHERE post_id = ? AND user_id = ?
+  `;
+  const [rows] = await pool.execute(query, [postId, userId]);
+  return rows.length > 0; // 해당 게시글에 공감한 적이 있는지 확인
+};
+
+  // 제목이나 내용에서 검색어가 포함된 게시글 검색
+  const searchPosts = async (keyword) => {
+    console.log("모델 들어옴");
+    const query = `
+      SELECT posts.id, posts.title, posts.content, posts.price, posts.image_url,
+            posts.created_at, users.nickname, COUNT(likes.id) AS likeCount
+      FROM posts
+      JOIN users ON posts.user_id = users.id
+      LEFT JOIN likes ON posts.id = likes.post_id
+      WHERE posts.title LIKE ? OR posts.content LIKE ?
+      GROUP BY posts.id
+      ORDER BY posts.created_at DESC
+    `;
+    const likeKeyword = `%${keyword}%`;  // SQL에서 LIKE 검색을 위해 앞뒤에 % 추가
+    const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+    return rows;
+
+    
+  };
+
+  // 카테고리별로 제목 또는 내용에서 검색어가 포함된 게시글 검색
+const searchPostsByCategory = async (category, keyword) => {
+  const query = `
+    SELECT posts.id, posts.title, posts.content, posts.price, posts.image_url,
+            posts.created_at, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.category = ? AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`; // 검색어 앞뒤에 %를 추가하여 LIKE 쿼리에 맞춤
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해드립니다"로 검색
+const searchOfferPosts = async (keyword) => {
+  const query = `
+    SELECT posts.*, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해드립니다'
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해주세요"로 검색
+const searchRequestPosts = async (keyword) => {
+  const query = `
+    SELECT posts.*, users.nickname, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해주세요'
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해드립니다" 게시글을 카테고리와 함께 검색 (공감수 포함)
+const searchOfferPostsByCategory = async (keyword, category) => {
+  const query = `
+    SELECT posts.*, users.nickname, users.department, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해드립니다' AND posts.category = ? 
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
+// "해주세요" 게시글을 카테고리와 함께 검색 (공감수 포함)
+const searchRequestPostsByCategory = async (keyword, category) => {
+  const query = `
+    SELECT posts.*, users.nickname, users.department, COUNT(likes.id) AS likeCount
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    LEFT JOIN likes ON posts.id = likes.post_id
+    WHERE posts.type = '해주세요' AND posts.category = ? 
+    AND (posts.title LIKE ? OR posts.content LIKE ?)
+    GROUP BY posts.id
+    ORDER BY posts.created_at DESC
+  `;
+  const likeKeyword = `%${keyword}%`;
+  const [rows] = await pool.execute(query, [category, likeKeyword, likeKeyword]);
+  return rows;
+};
+
+
 module.exports = {
   createPost,
   getLatestPosts,
@@ -157,4 +292,12 @@ module.exports = {
   updatePost,
   getTopLikedPostsByCategory,
   getLatestPostsByCategory,
+  getPostsByType,
+  searchPosts,
+  searchPostsByCategory,
+  hasUserLikedPost,
+  searchOfferPosts,
+  searchRequestPosts,
+  searchOfferPostsByCategory,
+  searchRequestPostsByCategory,
 };
