@@ -111,7 +111,7 @@ const getPostDetails = async (req, res) => {
           ...post,
           imageUrls,  // 이미지 배열 추가
           comments,
-          isLiked
+          isLiked,
       });
   } catch (error) {
       console.error(error);

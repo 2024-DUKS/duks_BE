@@ -32,7 +32,7 @@ const deleteComment = async (commentId, userId) => {
 // 게시글 ID로 해당 게시글의 댓글들을 가져오기 (닉네임, 학과, 작성 시간 포함)
 const getCommentsByPostId = async (postId) => {
   const query = `
-    SELECT comments.id, comments.content, comments.created_at, users.nickname, users.department
+    SELECT comments.id, comments.content, comments.created_at, comments.user_id, users.nickname, users.department
     FROM comments
     JOIN users ON comments.user_id = users.id
     WHERE comments.post_id = ?

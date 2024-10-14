@@ -101,10 +101,11 @@ const getLatestPostsByCategory = async (category) => {
 // 게시글 상세 정보를 ID로 가져오기
 const getPostById = async (postId) => {
     const query = `
-      SELECT posts.*, users.nickname, users.department,
+      SELECT posts.*, users.nickname, users.department, folioImgs.imagePath,
              (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) AS likes
       FROM posts
       JOIN users ON posts.user_id = users.id
+      LEFT JOIN folioImgs ON users.id = folioImgs.userId
       WHERE posts.id = ?
     `;
     const [rows] = await pool.execute(query, [postId]);
