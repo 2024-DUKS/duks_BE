@@ -4,7 +4,8 @@ const { createPost, getLatestPostsByType, //getPostsByCategory,
   getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, 
   searchPostsByCategory, hasUserLikedPost, searchOfferPosts, searchRequestPosts,
   searchOfferPostsByCategory, searchRequestPostsByCategory, getLikedPostsByUserId,
-  getPostsByUserId, } = require('../models/postModel');
+  getPostsByUserId, getLikedOfferPostsByUserId, getLikedRequestPostsByUserId,
+  getUserOfferPosts, getUserRequestPosts, } = require('../models/postModel');
 
 
   const createNewPost = async (req, res) => {
@@ -341,6 +342,58 @@ const getUserPosts = async (req, res) => {
   }
 };
 
+// 공감한 "해드립니다" 게시글 가져오기
+const getLikedOfferPosts = async (req, res) => {
+  const userId = req.user.id; // JWT로부터 로그인한 유저 ID 추출
+
+  try {
+    const likedPosts = await getLikedOfferPostsByUserId(userId);
+    res.status(200).json(likedPosts);
+  } catch (error) {
+    console.error('Error fetching liked offer posts:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
+
+// 공감한 "해주세요" 게시글 가져오기
+const getLikedRequestPosts = async (req, res) => {
+  const userId = req.user.id; // JWT로부터 로그인한 유저 ID 추출
+
+  try {
+    const likedPosts = await getLikedRequestPostsByUserId(userId);
+    res.status(200).json(likedPosts);
+  } catch (error) {
+    console.error('Error fetching liked request posts:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
+
+// 유저가 작성한 "해드립니다" 게시글 가져오기
+const getUserOfferPostsController = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const userPosts = await getUserOfferPosts(userId);
+    res.status(200).json(userPosts);
+  } catch (error) {
+    console.error('Error fetching user offer posts:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
+
+// 유저가 작성한 "해주세요" 게시글 가져오기
+const getUserRequestPostsController = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const userPosts = await getUserRequestPosts(userId);
+    res.status(200).json(userPosts);
+  } catch (error) {
+    console.error('Error fetching user request posts:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
+
 module.exports = {
   createNewPost,
   getMainPagePosts,
@@ -359,4 +412,8 @@ module.exports = {
   searchRequestPostsByCategoryController,
   getLikedPosts,
   getUserPosts,
+  getLikedOfferPosts,
+  getLikedRequestPosts,
+  getUserOfferPostsController,
+  getUserRequestPostsController,
 };
