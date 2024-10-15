@@ -11,12 +11,16 @@ const {
   uploadFolioImg,
   getUserFolioImg,
   editFolioImg,
-  removeFolioImg
+  removeFolioImg,
+  uploadPortfolioImages2,  // 여러 이미지 추가
+  getUserPortfolioImages2,
+  editPortfolioImage2,
+  removeAllPortfolioImages2  // 모든 이미지 삭제
 } = require('../controllers/portfolioController');
 const authenticateToken = require('../middlewares/authMiddleware');
 const multer = require('multer');
 
-// Multer 설정: 이미지를 서버에 저장할 경로 설정
+// Multer 설정: 여러 개의 이미지를 서버에 저장할 수 있도록 설정
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'uploads/');
@@ -24,9 +28,10 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       cb(null, Date.now() + '-' + file.originalname);
     }
-  });
+});
+
 const upload = multer({ storage });
-  
+
 const router = express.Router();
 
 // 스킬 추가 (경로를 /skills로 명확히 설정)
@@ -58,5 +63,11 @@ router.post('/folioImg', authenticateToken, upload.single('image'), uploadFolioI
 router.get('/folioImg', authenticateToken, getUserFolioImg);  // 이미지 조회
 router.put('/folioImg', authenticateToken, upload.single('image'), editFolioImg);  // 이미지 수정
 router.delete('/folioImg', authenticateToken, removeFolioImg);  // 이미지 삭제
+
+// portfolioImages2 관련 라우트
+router.post('/portfolioImages2', authenticateToken, upload.array('images', 10), uploadPortfolioImages2);  // 여러 이미지 업로드
+router.get('/portfolioImages2', authenticateToken, getUserPortfolioImages2);  // 이미지 조회
+router.put('/portfolioImages2/:id', authenticateToken, upload.single('image'), editPortfolioImage2);  // 이미지 수정
+router.delete('/portfolioImages2', authenticateToken, removeAllPortfolioImages2);  // 모든 이미지 삭제
 
 module.exports = router;
