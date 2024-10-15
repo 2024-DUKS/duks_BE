@@ -46,6 +46,8 @@ async function initializeDatabase() {
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
+
+    // folioImgs 테이블이 없으면 생성
     await connection.query(`
       CREATE TABLE IF NOT EXISTS folioImgs (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -54,7 +56,18 @@ async function initializeDatabase() {
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-    
+
+    // portfolioImages2 테이블이 없으면 생성 (최대 10개의 이미지 저장 가능)
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS portfolioImages2 (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        imagePath VARCHAR(255) NOT NULL,
+        imageOrder INT NOT NULL,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+
     console.log('Database tables initialized.');
   } catch (error) {
     console.error('Error initializing database tables:', error);
