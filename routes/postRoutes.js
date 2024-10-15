@@ -4,7 +4,7 @@ const { createNewPost, getMainPagePosts, getCategoryPosts, getPostDetails,
     likePost, deleteUserPost, unlikePost, updateUserPost, getPostsByCategory, 
     searchForPosts, searchCategoryPosts, searchOfferPostsController,
     searchRequestPostsController, searchOfferPostsByCategoryController,
-    searchRequestPostsByCategoryController, } = require('../controllers/postController');
+    searchRequestPostsByCategoryController, getLikedPosts, getUserPosts, } = require('../controllers/postController');
 const authenticateToken = require('../middlewares/authMiddleware'); // JWT 미들웨어 추가
 const multer = require('multer');
 
@@ -38,6 +38,12 @@ router.post('/create', authenticateToken, upload.array('images', 5), createNewPo
 
 // 게시글 검색 라우트
 router.get('/search', searchForPosts);  // 검색 API 등록
+
+// 로그인한 유저가 공감한 모든 게시글 가져오기 (JWT 인증 필요)
+router.get('/liked', authenticateToken, getLikedPosts);
+
+// 로그인한 유저가 작성한 게시글 가져오기 (JWT 인증 필요)
+router.get('/myposts', authenticateToken, getUserPosts);
 
 // "해드립니다" 게시글 통합검색
 router.get('/search/offer', searchOfferPostsController);

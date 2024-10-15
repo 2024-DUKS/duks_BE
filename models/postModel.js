@@ -278,6 +278,33 @@ const searchRequestPostsByCategory = async (keyword, category) => {
   return rows;
 };
 
+// 로그인한 유저가 공감한 모든 게시글을 가져오기
+const getLikedPostsByUserId = async (userId) => {
+  const query = `
+    SELECT posts.title, posts.price, posts.image_url, posts.created_at, users.nickname
+    FROM posts
+    JOIN likes ON posts.id = likes.post_id
+    JOIN users ON posts.user_id = users.id
+    WHERE likes.user_id = ?
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
+// 유저가 작성한 게시글들을 가져오기
+const getPostsByUserId = async (userId) => {
+  const query = `
+    SELECT posts.*, users.nickname
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id = ?
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
 
 module.exports = {
   createPost,
@@ -300,4 +327,6 @@ module.exports = {
   searchRequestPosts,
   searchOfferPostsByCategory,
   searchRequestPostsByCategory,
+  getLikedPostsByUserId,
+  getPostsByUserId,
 };
