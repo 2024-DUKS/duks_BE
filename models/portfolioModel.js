@@ -1,5 +1,11 @@
 const pool = require('../config/db');
 
+const findUserById = async (id) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  const [rows] = await pool.execute(query, [id]);
+  return rows[0];
+};
+
 // 스킬 관련 함수들
 const addSkill = async (userId, skill, level) => {
   const query = `INSERT INTO portfolios (userId, skill, level) VALUES (?, ?, ?)`
@@ -156,6 +162,7 @@ module.exports = {
   getSkills,
   getSkillById,
   deleteSkill,
+  findUserById,
   addCharactor,
   getCharactor,
   updateCharactor,
