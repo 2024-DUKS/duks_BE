@@ -3,7 +3,8 @@ const { createPost, getLatestPostsByType, //getPostsByCategory,
   getPostById, getCommentsByPostId, addLike, deletePost, removeLike, updatePost,
   getTopLikedPostsByCategory, getLatestPostsByCategory, getPostsByType, searchPosts, 
   searchPostsByCategory, hasUserLikedPost, searchOfferPosts, searchRequestPosts,
-  searchOfferPostsByCategory, searchRequestPostsByCategory,} = require('../models/postModel');
+  searchOfferPostsByCategory, searchRequestPostsByCategory, getLikedPostsByUserId,
+  getPostsByUserId, } = require('../models/postModel');
 
 
   const createNewPost = async (req, res) => {
@@ -300,7 +301,45 @@ const searchRequestPostsByCategoryController = async (req, res) => {
     res.status(500).json({ message: '게시글 검색 중 오류가 발생했습니다.' });
   }
 };
-  
+
+const getLikedPosts = async (req, res) => {
+  const userId = req.user.id; // 로그인한 유저의 ID
+
+  try {
+    const likedPosts = await getLikedPostsByUserId(userId);
+    
+    // 디버깅: likedPosts를 콘솔에 출력
+    console.log('Liked Posts:', likedPosts); 
+
+    if (likedPosts.length === 0) {
+      return res.status(404).json({ message: '게시글을 찾을 수 없습니다.' });
+    }
+
+    res.status(200).json(likedPosts);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
+
+// 로그인한 유저가 작성한 게시글 가져오기
+const getUserPosts = async (req, res) => {
+  const userId = req.user.id; // JWT로부터 가져온 로그인된 유저의 ID
+
+  try {
+    const userPosts = await getPostsByUserId(userId);
+    
+    // 유저가 작성한 게시글이 없을 경우
+    if (userPosts.length === 0) {
+      return res.status(404).json({ message: '작성한 게시글이 없습니다.' });
+    }
+
+    res.status(200).json(userPosts);
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    res.status(500).json({ message: '게시글 정보를 가져오는 중 오류가 발생했습니다.' });
+  }
+};
 
 module.exports = {
   createNewPost,
@@ -318,4 +357,6 @@ module.exports = {
   searchRequestPostsController,
   searchOfferPostsByCategoryController,
   searchRequestPostsByCategoryController,
+  getLikedPosts,
+  getUserPosts,
 };
