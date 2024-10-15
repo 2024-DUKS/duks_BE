@@ -15,7 +15,11 @@ const {
   uploadPortfolioImages2,  // 여러 이미지 추가
   getUserPortfolioImages2,
   editPortfolioImage2,
-  removeAllPortfolioImages2  // 모든 이미지 삭제
+  removeAllPortfolioImages2,
+  createCharactor2,  // 이 부분이 제대로 불러와졌는지 확인
+  getUserCharactor2,
+  editCharactor2,
+  removeCharactor2  
 } = require('../controllers/portfolioController');
 const authenticateToken = require('../middlewares/authMiddleware');
 const multer = require('multer');
@@ -70,4 +74,9 @@ router.get('/portfolioImages2', authenticateToken, getUserPortfolioImages2);  //
 router.put('/portfolioImages2/:id', authenticateToken, upload.single('image'), editPortfolioImage2);  // 이미지 수정
 router.delete('/portfolioImages2', authenticateToken, removeAllPortfolioImages2);  // 모든 이미지 삭제
 
+// charactor2 관련 라우트
+router.post('/charactor2', authenticateToken, createCharactor2);  // 여기에 문제가 없는지 확인
+router.get('/charactor2', authenticateToken, getUserCharactor2);
+router.put('/charactor2', authenticateToken, editCharactor2);
+router.delete('/charactor2', authenticateToken, removeCharactor2);
 module.exports = router;
