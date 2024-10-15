@@ -20,7 +20,9 @@ const {
   addCharactor2,   // 추가된 함수들
   getCharactor2,   // 추가된 함수들
   updateCharactor2, // 추가된 함수들
-  deleteCharactor2  // 추가된 함수들
+  deleteCharactor2,
+  findUserById,
+    // 추가된 함수들
 } = require('../models/portfolioModel');
 
 // 스킬 추가
@@ -31,6 +33,41 @@ const createSkill = async (req, res) => {
   try {
     await addSkill(userId, skill, level);
     res.status(201).json({ message: '스킬이 추가되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+// 유저의 전체 포트폴리오 조회
+const getUserPortfolio = async (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: '유저를 찾을 수 없습니다.' });
+    }
+
+    const skills = await getSkills(userId);
+    const charactor = await getCharactor(userId);
+    const charactor2 = await getCharactor2(userId);
+    const portfolioImages = await getPortfolioImages2(userId);
+    const folioImg = await getFolioImg(userId);
+
+    res.status(200).json({
+      user: {
+        name: user.name,
+        phone: user.phone,
+        department: user.department,
+        nickname: user.nickname,
+      },
+      skills,
+      charactor,
+      charactor2,
+      portfolioImages,
+      profileImage: folioImg ? folioImg.imagePath : null,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
@@ -373,6 +410,7 @@ module.exports = {
   getAllSkills,
   getSkill,
   removeSkill,
+  getUserPortfolio,
   createCharactor,
   getUserCharactor,
   editCharactor,
