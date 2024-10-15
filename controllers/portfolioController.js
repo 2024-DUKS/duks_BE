@@ -16,7 +16,11 @@ const {
   addPortfolioImage2,
   getPortfolioImages2,
   updatePortfolioImage2,
-  deletePortfolioImage2
+  deletePortfolioImage2,
+  addCharactor2,   // 추가된 함수들
+  getCharactor2,   // 추가된 함수들
+  updateCharactor2, // 추가된 함수들
+  deleteCharactor2  // 추가된 함수들
 } = require('../models/portfolioModel');
 
 // 스킬 추가
@@ -307,6 +311,63 @@ const removeAllPortfolioImages2 = async (req, res) => {
   }
 };
 
+// Charactor2 추가
+const createCharactor2 = async (req, res) => {
+  const { charactor2 } = req.body;
+  const userId = req.user.id;
+
+  try {
+    await addCharactor2(userId, charactor2);
+    res.status(201).json({ message: 'Charactor2가 추가되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+// Charactor2 조회
+const getUserCharactor2 = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const charactor2 = await getCharactor2(userId);
+    if (!charactor2) {
+      return res.status(400).json({ message: 'Charactor2를 찾을 수 없습니다.' });
+    }
+    res.status(200).json(charactor2);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+// Charactor2 수정
+const editCharactor2 = async (req, res) => {
+  const { charactor2 } = req.body;
+  const userId = req.user.id;
+
+  try {
+    await updateCharactor2(userId, charactor2);
+    res.status(200).json({ message: 'Charactor2가 수정되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
+// Charactor2 삭제
+const removeCharactor2 = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    await deleteCharactor2(userId);
+    res.status(200).json({ message: 'Charactor2가 삭제되었습니다.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
 module.exports = {
   createSkill,
   getAllSkills,
@@ -323,5 +384,9 @@ module.exports = {
   uploadPortfolioImages2,  // 여러 이미지 추가
   getUserPortfolioImages2,
   editPortfolioImage2,
-  removeAllPortfolioImages2  // 모든 이미지 삭제
+  removeAllPortfolioImages2,
+  createCharactor2,  // 반드시 module.exports에 포함되어 있어야 합니다.
+  getUserCharactor2,
+  editCharactor2,
+  removeCharactor2  
 };
