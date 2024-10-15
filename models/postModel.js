@@ -305,6 +305,60 @@ const getPostsByUserId = async (userId) => {
   return rows;
 };
 
+// 유저가 공감한 "해드립니다" 게시글 가져오기
+const getLikedOfferPostsByUserId = async (userId) => {
+  const query = `
+    SELECT posts.*, users.nickname
+    FROM posts
+    JOIN likes ON posts.id = likes.post_id
+    JOIN users ON posts.user_id = users.id
+    WHERE likes.user_id = ? AND posts.type = '해드립니다'
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
+// 유저가 공감한 "해주세요" 게시글 가져오기
+const getLikedRequestPostsByUserId = async (userId) => {
+  const query = `
+    SELECT posts.*, users.nickname
+    FROM posts
+    JOIN likes ON posts.id = likes.post_id
+    JOIN users ON posts.user_id = users.id
+    WHERE likes.user_id = ? AND posts.type = '해주세요'
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
+// 유저가 작성한 "해드립니다" 게시글 가져오기
+const getUserOfferPosts = async (userId) => {
+  const query = `
+    SELECT posts.*, users.nickname
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id = ? AND posts.type = '해드립니다'
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
+// 유저가 작성한 "해주세요" 게시글 가져오기
+const getUserRequestPosts = async (userId) => {
+  const query = `
+    SELECT posts.*, users.nickname
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id = ? AND posts.type = '해주세요'
+    ORDER BY posts.created_at DESC
+  `;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows;
+};
+
 
 module.exports = {
   createPost,
@@ -329,4 +383,8 @@ module.exports = {
   searchRequestPostsByCategory,
   getLikedPostsByUserId,
   getPostsByUserId,
+  getLikedOfferPostsByUserId,
+  getLikedRequestPostsByUserId,
+  getUserOfferPosts,
+  getUserRequestPosts,
 };

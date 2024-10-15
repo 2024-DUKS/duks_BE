@@ -4,7 +4,8 @@ const { createNewPost, getMainPagePosts, getCategoryPosts, getPostDetails,
     likePost, deleteUserPost, unlikePost, updateUserPost, getPostsByCategory, 
     searchForPosts, searchCategoryPosts, searchOfferPostsController,
     searchRequestPostsController, searchOfferPostsByCategoryController,
-    searchRequestPostsByCategoryController, getLikedPosts, getUserPosts, } = require('../controllers/postController');
+    searchRequestPostsByCategoryController, getLikedPosts, getUserPosts,
+    getLikedOfferPosts,getLikedRequestPosts,getUserOfferPostsController,getUserRequestPostsController, } = require('../controllers/postController');
 const authenticateToken = require('../middlewares/authMiddleware'); // JWT 미들웨어 추가
 const multer = require('multer');
 
@@ -44,6 +45,18 @@ router.get('/liked', authenticateToken, getLikedPosts);
 
 // 로그인한 유저가 작성한 게시글 가져오기 (JWT 인증 필요)
 router.get('/myposts', authenticateToken, getUserPosts);
+
+// 로그인한 유저가 공감한 "해드립니다" 게시글 가져오기
+router.get('/liked/offer', authenticateToken, getLikedOfferPosts);
+
+// 로그인한 유저가 공감한 "해주세요" 게시글 가져오기
+router.get('/liked/request', authenticateToken, getLikedRequestPosts);
+
+// 로그인한 유저가 작성한 "해드립니다" 게시글 가져오기
+router.get('/myposts/offer', authenticateToken, getUserOfferPostsController);
+
+// 로그인한 유저가 작성한 "해주세요" 게시글 가져오기
+router.get('/myposts/request', authenticateToken, getUserRequestPostsController);
 
 // "해드립니다" 게시글 통합검색
 router.get('/search/offer', searchOfferPostsController);
