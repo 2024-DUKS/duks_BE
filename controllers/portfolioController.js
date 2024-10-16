@@ -193,14 +193,32 @@ const removeCharactor = async (req, res) => {
   }
 };
 
-// folioImg 추가
+// folioImg 추가 또는 수정
 const uploadFolioImg = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // 먼저 기존 이미지가 있는지 확인
+    const existingImg = await getFolioImg(userId);
+
     const imagePath = req.file.path;
-    await addFolioImg(userId, imagePath);
-    res.status(201).json({ message: '이미지가 추가되었습니다.', imagePath });
+
+    if (existingImg) {
+      // 기존 이미지가 있으면 수정 로직 실행
+      // 기존 이미지 파일 삭제
+      if (existingImg.imagePath) {
+        fs.unlinkSync(path.resolve(existingImg.imagePath));
+      }
+
+      // 새로운 이미지로 대체
+      await updateFolioImg(userId, imagePath);
+      res.status(200).json({ message: '이미지가 수정되었습니다.', imagePath });
+    } else {
+      // 기존 이미지가 없으면 추가
+      await addFolioImg(userId, imagePath);
+      res.status(201).json({ message: '이미지가 추가되었습니다.', imagePath });
+    }
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
@@ -231,25 +249,30 @@ const editFolioImg = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // 기존 이미지 조회
     const oldImg = await getFolioImg(userId);
     if (!oldImg) {
       return res.status(400).json({ message: '수정할 이미지가 없습니다.' });
     }
 
+    // 새로운 이미지 경로 설정
     const newImagePath = req.file.path;
 
-    // 기존 이미지 파일 삭제
+    // 기존 이미지 파일이 존재하면 파일 시스템에서 삭제
     if (oldImg.imagePath) {
       fs.unlinkSync(path.resolve(oldImg.imagePath));
     }
 
+    // 데이터베이스에서 이미지 경로를 새로운 이미지로 업데이트
     await updateFolioImg(userId, newImagePath);
-    res.status(200).json({ message: '이미지가 수정되었습니다.', newImagePath });
+
+    res.status(200).json({ message: '이미지가 성공적으로 수정되었습니다.', newImagePath });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
+
 
 // folioImg 삭제
 const removeFolioImg = async (req, res) => {
