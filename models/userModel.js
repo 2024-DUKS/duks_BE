@@ -20,8 +20,15 @@ const findUserById = async (id) => {
   return rows[0];
 };
 
+const deleteUserById = async (id) => {
+  const query = `DELETE FROM users WHERE id = ?`;
+  const [result] = await pool.execute(query, [id]);
+  return result.affectedRows > 0; // 삭제된 행이 있는지 확인
+};
+
 module.exports = {
   createUser,
   findUserByStudentId,
   findUserById,
+  deleteUserById,
 };

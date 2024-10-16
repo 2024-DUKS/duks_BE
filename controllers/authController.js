@@ -114,9 +114,30 @@ const getUserField = async (req, res) => {
   }
 };
 
+const { deleteUserById } = require('../models/userModel');
+
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // 토큰에서 가져온 사용자 ID
+
+    // 사용자 삭제
+    const result = await deleteUserById(userId);
+
+    if (result) {
+      res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
+    } else {
+      res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
+
 module.exports = {
   register,
   login,
   getUserDetails,
   getUserField, // 필드별 조회 함수 추가
+  deleteUser,
 };
