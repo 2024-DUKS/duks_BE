@@ -216,7 +216,10 @@ const getUserFolioImg = async (req, res) => {
     if (!folioImg) {
       return res.status(400).json({ message: '이미지가 없습니다.' });
     }
-    res.sendFile(path.resolve(folioImg.imagePath));
+    res.status(200).json({
+      id: folioImg.id,
+      imagePath: folioImg.imagePath,  // 이미지 경로와 ID를 반환
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
