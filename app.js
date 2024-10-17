@@ -53,7 +53,7 @@ async function initializeDatabase() {
       password VARCHAR(255) NOT NULL,
       nickname VARCHAR(50),
       department VARCHAR(100),
-      phone VARCHAR(20)
+      phone VARCHAR(100)
     );
   `);
   // portfolios 테이블이 없으면 생성
@@ -101,7 +101,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes); // 댓글 라우터 경로 추가
 app.use('/api/portfolios', portfolioRoutes);
-app.use('/api/portfolio', portfolioRoutes);
+
 
 // 서버 실행 및 DB 초기화
 const PORT = process.env.PORT || 5000;
