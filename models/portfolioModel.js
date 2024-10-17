@@ -131,10 +131,22 @@ const deletePortfolioImage2 = async (userId, imageId) => {
 
 // charactor2 추가
 const addCharactor2 = async (userId, charactor2) => {
-  const query = `INSERT INTO charactors2 (userId, charactor2) VALUES (?, ?)`
-  const [result] = await pool.execute(query, [userId, charactor2])
-  return result
-}
+  // 해당 유저의 charactor2가 이미 존재하는지 확인
+  const existingCharactor2 = await getCharactor2(userId);
+
+  if (existingCharactor2) {
+    // 이미 존재하면, 기존 charactor2를 업데이트
+    const query = `UPDATE charactors2 SET charactor2 = ? WHERE userId = ?`;
+    const [result] = await pool.execute(query, [charactor2, userId]);
+    return result;
+  } else {
+    // 존재하지 않으면, 새로운 charactor2를 추가
+    const query = `INSERT INTO charactors2 (userId, charactor2) VALUES (?, ?)`;
+    const [result] = await pool.execute(query, [userId, charactor2]);
+    return result;
+  }
+};
+
 
 // charactor2 조회
 const getCharactor2 = async (userId) => {
